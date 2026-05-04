@@ -1,25 +1,21 @@
 # LogicLegion v0 Runbook
 
-This document serves as the central reference for the deployment topology and basic operational procedures for LogicLegion v0 (alpha environment).
-
 ## Deployment Topology
-
-LogicLegion v0 is deployed as a containerized application running on Google Cloud Run. 
+LogicLegion v0 is deployed as a containerized service running on Google Cloud Run. This is an alpha/pre-production environment (not production).
 
 ## Operational Procedures
 
 ### Reverting a Faulty Deployment
+If a developer needs to revert a faulty deployment, the following `gcloud` command can be used to roll back the Cloud Run revision by splitting traffic to a previous stable revision:
 
-If a recent deployment causes issues, you can roll back to a previous revision using the `gcloud` CLI.
-
-1. List the available revisions to find the name of the previous stable revision:
+1. **Find the previous stable revision:**
    ```bash
-   gcloud run revisions list --service logiclegion-v0 --region <YOUR_REGION>
+   gcloud run revisions list --service=logiclegion-service --region=<REGION>
    ```
 
-2. Update the traffic allocation to point 100% of the traffic to the stable revision:
+2. **Roll back the Cloud Run revision:**
    ```bash
-   gcloud run services update-traffic logiclegion-v0 \
-       --region <YOUR_REGION> \
-       --to-revisions=<STABLE_REVISION_NAME>=100
+   gcloud run services update-traffic logiclegion-service \
+     --to-revisions=<PREVIOUS_REVISION_NAME>=100 \
+     --region=<REGION>
    ```
