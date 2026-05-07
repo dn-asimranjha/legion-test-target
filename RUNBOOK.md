@@ -1,19 +1,26 @@
-# RUNBOOK: LogicLegion v0
+# LogicLegion v0 RUNBOOK
 
 ## Deployment Topology
-LogicLegion v0 is deployed as a single Cloud Run service acting as a throwaway test target. It is isolated from other services and serves as an initial architecture dry-run. 
+LogicLegion v0 is deployed as a containerized application running on Google Cloud Run.
+This document outlines the current non-production deployment topology and operational procedures.
 
-*Note: This is a non-production service. It does not claim production status.*
+### Infrastructure Components
+- **Compute:** Google Cloud Run (fully managed serverless platform).
+- **Registry:** Artifact Registry (for storing Docker images).
 
-## Rollback Procedure
-If a deployment is faulty, revert the Cloud Run revision immediately to restore stability.
+## Operational Procedures
 
-Use the exact `gcloud` command to rollback traffic:
+### Rollback a Faulty Deployment
+If a deployment fails or exhibits issues, you can revert traffic to a previous known-good Cloud Run revision.
+
+To find available revisions:
 ```bash
-gcloud run services update-traffic <service-name> --to-revisions=<revision>=100
+gcloud run revisions list --service=logiclegion-v0
 ```
-*(Alternatively, `gcloud run services rollback <service-name>` can be used for the latest stable revision)*
 
-## Security & Operational Constraints
-- No secrets, DSNs, or cookie values should ever be hardcoded or documented in plain text.
-- Refer to the system environment variables or secret manager for sensitive values.
+To roll back the Cloud Run revision to a previous state, route 100% of traffic to the desired revision:
+```bash
+gcloud run services update-traffic logiclegion-v0 \
+  --to-revisions=logiclegion-v0-xxxxx=100
+```
+Replace `logiclegion-v0-xxxxx` with the target revision name.
